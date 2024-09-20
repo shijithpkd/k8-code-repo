@@ -1,8 +1,78 @@
 <!DOCTYPE html>
-<html>
-   <body style="background-color:lightgoldenrodyellow;">
-      <h1>Welcome to Nginx server</h1>
-      <p>Docker for Beginners Demo</p>
-      <p>Application Version: V1</p>
-   </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGINX Latency Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+        .latency {
+            font-size: 24px;
+            color: #333;
+        }
+        .server-names {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>NGINX Server Latency Test</h1>
+    <div class="latency" id="latency">Latency: </div>
+    <div class="server-names" id="server-names">
+        Last Accessed Server Names: <br>
+        <ul id="server-list"></ul>
+    </div>
+    <script>
+        const serverNames = [];
+        const maxServerNames = 10;
+
+        function updateLatency() {
+            const startTime = performance.now();
+            fetch(window.location.href) // Fetch the current page
+                .then(response => {
+                    const endTime = performance.now();
+                    const latency = (endTime - startTime).toFixed(2);
+                    document.getElementById('latency').innerText = `Latency: ${latency} ms`;
+
+                    // Use the hostname as the server name
+                    const serverName = window.location.hostname;
+                    addServerName(serverName);
+                })
+                .catch(err => {
+                    document.getElementById('latency').innerText = 'Error fetching the page';
+                });
+        }
+
+        function addServerName(serverName) {
+            if (!serverNames.includes(serverName)) {
+                serverNames.unshift(serverName);
+                if (serverNames.length > maxServerNames) {
+                    serverNames.pop(); // Remove the oldest server name
+                }
+            }
+            updateServerList();
+        }
+
+        function updateServerList() {
+            const serverList = document.getElementById('server-list');
+            serverList.innerHTML = ''; // Clear current list
+            serverNames.forEach(name => {
+                const listItem = document.createElement('li');
+                listItem.textContent = name;
+                serverList.appendChild(listItem);
+            });
+        }
+
+        // Update latency every second
+        setInterval(updateLatency, 1000);
+        updateLatency(); // Initial call
+    </script>
+</body>
 </html>

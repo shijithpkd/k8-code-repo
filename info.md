@@ -42,3 +42,14 @@ kubeadm join 139.59.87.151:6443 --token esw1fx.2uuxl99exzf3e2bz \
 
 
 
+dokcer Hub
+
+
+To use the access token from your Docker CLI client:
+
+1. Run
+
+docker login -u shijithpkd
+2. At the password prompt, enter the personal access token.
+
+dckr_pat_h-bHfPgbjDBZESwV7oK6kpWV3zQ
