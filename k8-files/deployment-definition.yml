@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-replicaset
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels:
+          app: myapp
+          type: front-end
+    spec:
+        containers:
+        - name: nginx-server
+          image: shijithpkd/k8nginx:1.0.1
+  replicas: 4
+  selector:
+    matchLabels:
+      type: front-end
+    
