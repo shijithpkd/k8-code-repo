@@ -3,76 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGINX Latency Test</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Awesome Website</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             background-color: #f4f4f4;
-            text-align: center;
-            padding: 50px;
-        }
-        .latency {
-            font-size: 24px;
             color: #333;
         }
-        .server-names {
+        header {
+            background-color: #4CAF50;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        nav {
+            background-color: #333;
+            overflow: hidden;
+        }
+        nav a {
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        section {
+            padding: 20px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            overflow: hidden;
+        }
+        .main-article {
+            float: left;
+            width: 70%;
+        }
+        .sidebar {
+            float: right;
+            width: 30%;
+        }
+        .article {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .sidebar-widget {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
             margin-top: 20px;
-            font-size: 18px;
-            color: #555;
+        }
+        .cta-button:hover {
+            background-color: #45a049;
+        }
+        .big-section {
+            background-color: #e2e2e2;
+            padding: 50px 0;
+            text-align: center;
+        }
+        .big-section h2 {
+            margin-bottom: 40px;
         }
     </style>
 </head>
 <body>
-    <h1>NGINX Server Latency Test</h1>
-    <div class="latency" id="latency">Latency: </div>
-    <div class="server-names" id="server-names">
-        Last Accessed Server Names: <br>
-        <ul id="server-list"></ul>
+
+<header>
+    <h1>Welcome to My Awesome Website</h1>
+</header>
+
+<nav>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Services</a>
+    <a href="#">Blog</a>
+    <a href="#">Contact</a>
+</nav>
+
+<section class="container clearfix">
+    <div class="main-article">
+        <article class="article">
+            <h2>Main Article 1</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin suscipit euismod felis, non venenatis ligula facilisis sit amet. Fusce efficitur felis nec libero vehicula, at feugiat dui fermentum. Nulla facilisi. Vivamus eget pharetra magna, et ultricies neque. Ut egestas, elit id feugiat suscipit, neque ligula scelerisque magna, ut faucibus ligula lorem nec nisl.</p>
+            <a href="#" class="cta-button">Read More</a>
+        </article>
+        <article class="article">
+            <h2>Main Article 2</h2>
+            <p>Pellentesque sit amet facilisis ipsum. In a libero ac ex ullamcorper faucibus. In non tincidunt orci. Mauris pellentesque tortor sit amet justo pretium fringilla. Praesent fermentum magna sit amet orci tristique, ut tempor neque porttitor. Proin elementum, quam ut aliquam fermentum, ligula elit scelerisque felis, at ultricies odio nunc ut enim.</p>
+            <a href="#" class="cta-button">Read More</a>
+        </article>
     </div>
-    <script>
-        const serverNames = [];
-        const maxServerNames = 10;
+    
+    <aside class="sidebar">
+        <div class="sidebar-widget">
+            <h2>Recent Posts</h2>
+            <ul>
+                <li><a href="#">How to Create a Website</a></li>
+                <li><a href="#">5 Tips for Web Design</a></li>
+                <li><a href="#">Why You Need SEO</a></li>
+                <li><a href="#">Understanding UX/UI Design</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-widget">
+            <h2>Popular Topics</h2>
+            <ul>
+                <li><a href="#">Web Development</a></li>
+                <li><a href="#">Digital Marketing</a></li>
+                <li><a href="#">UI/UX Design</a></li>
+                <li><a href="#">SEO Tips</a></li>
+            </ul>
+        </div>
+    </aside>
+</section>
 
-        function updateLatency() {
-            const startTime = performance.now();
-            fetch(window.location.href) // Fetch the current page
-                .then(response => {
-                    const endTime = performance.now();
-                    const latency = (endTime - startTime).toFixed(2);
-                    document.getElementById('latency').innerText = `Latency: ${latency} ms`;
+<section class="big-section">
+    <div class="container">
+        <h2>Our Services</h2>
+        <div>
+            <div style="width: 30%; float: left; padding: 0 15px;">
+                <h3>Web Design</h3>
+                <p>Our expert team delivers high-quality designs to meet your needs.</p>
+            </div>
+            <div style="width: 30%; float: left; padding: 0 15px;">
+                <h3>SEO Optimization</h3>
+                <p>Improve your search engine rankings with our proven strategies.</p>
+            </div>
+            <div style="width: 30%; float: left; padding: 0 15px;">
+                <h3>Marketing Solutions</h3>
+                <p>We offer a wide range of marketing solutions tailored to your brand.</p>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</section>
 
-                    // Use the hostname as the server name
-                    const serverName = window.location.hostname;
-                    addServerName(serverName);
-                })
-                .catch(err => {
-                    document.getElementById('latency').innerText = 'Error fetching the page';
-                });
-        }
+<section class="container clearfix">
+    <div class="main-article">
+        <article class="article">
+            <h2>Main Article 3</h2>
+            <p>Phasellus nec justo lectus. Integer at volutpat lorem, at cursus sem. Sed vestibulum leo sed libero suscipit, eget efficitur mi mollis. Sed ut tellus lectus. Vivamus ut risus lectus. Suspendisse euismod, metus nec volutpat aliquam, lorem odio vehicula magna, ac faucibus lectus justo sed erat. Donec fringilla sapien nec nibh lacinia, nec congue nunc scelerisque.</p>
+            <a href="#" class="cta-button">Read More</a>
+        </article>
+        <article class="article">
+            <h2>Main Article 4</h2>
+            <p>Quisque in sem vitae sapien feugiat sollicitudin non vel neque. Aenean aliquet tempor dolor ut consectetur. Nulla fermentum accumsan orci, id vestibulum nisi elementum non. Vivamus elementum ipsum non ipsum consequat, quis iaculis enim fringilla. Sed at velit massa.</p>
+            <a href="#" class="cta-button">Read More</a>
+        </article>
+    </div>
+    
+    <aside class="sidebar">
+        <div class="sidebar-widget">
+            <h2>More Topics</h2>
+            <ul>
+                <li><a href="#">Social Media Strategies</a></li>
+                <li><a href="#">Mobile Optimization</a></li>
+                <li><a href="#">Content Marketing</a></li>
+                <li><a href="#">Design Trends 2024</a></li>
+            </ul>
+        </div>
+    </aside>
+</section>
 
-        function addServerName(serverName) {
-            if (!serverNames.includes(serverName)) {
-                serverNames.unshift(serverName);
-                if (serverNames.length > maxServerNames) {
-                    serverNames.pop(); // Remove the oldest server name
-                }
-            }
-            updateServerList();
-        }
+<footer>
+    <p>My Awesome Website © 2024. All Rights Reserved.</p>
+</footer>
 
-        function updateServerList() {
-            const serverList = document.getElementById('server-list');
-            serverList.innerHTML = ''; // Clear current list
-            serverNames.forEach(name => {
-                const listItem = document.createElement('li');
-                listItem.textContent = name;
-                serverList.appendChild(listItem);
-            });
-        }
-
-        // Update latency every second
-        setInterval(updateLatency, 1000);
-        updateLatency(); // Initial call
-    </script>
 </body>
 </html>
