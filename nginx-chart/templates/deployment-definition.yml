@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-nginx
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels:
+          app: myapp
+          type: front-end
+    spec:
+        containers:
+        - name: nginx-server
+          image: {{ .Value.image.repository }}:{{ .Value.image.tag }}
+  replicas: {{ .Value.replicaCount }}
+  selector:
+    matchLabels:
+      type: front-end
+    
