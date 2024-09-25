@@ -15,8 +15,8 @@ spec:
     spec:
         containers:
         - name: nginx-server
-          image: {{ .Value.image.repository }}:{{ .Value.image.tag }}
-  replicas: {{ .Value.replicaCount }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       type: front-end
