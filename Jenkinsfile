@@ -56,7 +56,7 @@ pipeline {
                 script {
                     // Define variables for container name and test port
                     def containerName = "nginx-test-${env.BUILD_NUMBER}"
-                    def testPort = 8080  // You can choose any available port
+                    def testPort = 9090  // You can choose any available port
 
                     // Step 1: Run the Nginx container in detached mode
                     sh """
