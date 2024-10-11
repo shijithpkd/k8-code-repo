@@ -1,0 +1,264 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/containerID: 1b85b7d86db33e941e23498fa675660e4a08bad9c28322d413600efca1faeeb9
+    cni.projectcalico.org/podIP: 10.244.140.120/32
+    cni.projectcalico.org/podIPs: 10.244.140.120/32
+  creationTimestamp: "2024-10-08T16:16:10Z"
+  generateName: prometheus-server-54c8d5898c-
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: prometheus
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: prometheus
+    app.kubernetes.io/version: v2.54.1
+    helm.sh/chart: prometheus-25.27.0
+    pod-template-hash: 54c8d5898c
+  name: prometheus-server-54c8d5898c-8lwhz
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: prometheus-server-54c8d5898c
+    uid: a6836739-0465-4ab9-a5cf-3f3ff252ede2
+  resourceVersion: "738377"
+  uid: 2d5a3660-12d4-44e1-9a1b-7e3e39b812a3
+spec:
+  containers:
+  - args:
+    - --watched-dir=/etc/config
+    - --listen-address=0.0.0.0:8080
+    - --reload-url=http://127.0.0.1:9090/-/reload
+    image: quay.io/prometheus-operator/prometheus-config-reloader:v0.76.0
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /healthz
+        port: metrics
+        scheme: HTTP
+      initialDelaySeconds: 2
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    name: prometheus-server-configmap-reload
+    ports:
+    - containerPort: 8080
+      name: metrics
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /healthz
+        port: metrics
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/config
+      name: config-volume
+      readOnly: true
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-fz5ph
+      readOnly: true
+  - args:
+    - --storage.tsdb.retention.time=15d
+    - --config.file=/etc/config/prometheus.yml
+    - --storage.tsdb.path=/data
+    - --web.console.libraries=/etc/prometheus/console_libraries
+    - --web.console.templates=/etc/prometheus/consoles
+    - --web.enable-lifecycle
+    image: quay.io/prometheus/prometheus:v2.54.1
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /-/healthy
+        port: 9090
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      successThreshold: 1
+      timeoutSeconds: 10
+    name: prometheus-server
+    ports:
+    - containerPort: 9090
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /-/ready
+        port: 9090
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 4
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/config
+      name: config-volume
+    - mountPath: /data
+      name: storage-volume
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-fz5ph
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  initContainers:
+  - command:
+    - sh
+    - -c
+    - rm -f /data/lock && chown -R 65534:65534 /data
+    image: busybox
+    imagePullPolicy: Always
+    name: init-permissions
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsGroup: 65534
+      runAsUser: 65534
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /data
+      name: storage-volume
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-fz5ph
+      readOnly: true
+  nodeName: node02
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext:
+    fsGroup: 65534
+    runAsGroup: 65534
+    runAsNonRoot: true
+    runAsUser: 65534
+  serviceAccount: prometheus-server
+  serviceAccountName: prometheus-server
+  terminationGracePeriodSeconds: 300
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - configMap:
+      defaultMode: 420
+      name: prometheus-server
+    name: config-volume
+  - name: storage-volume
+    persistentVolumeClaim:
+      claimName: prometheus-server
+  - name: kube-api-access-fz5ph
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-10-08T16:16:11Z"
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2024-10-08T16:16:11Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-10-08T19:48:20Z"
+    message: 'containers with unready status: [prometheus-server]'
+    reason: ContainersNotReady
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-10-08T19:48:20Z"
+    message: 'containers with unready status: [prometheus-server]'
+    reason: ContainersNotReady
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-10-08T16:16:10Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://1d40794cd293fe8da301a17f5605fd7a7d56c3fdeedcb89d701ec7aea872d5f9
+    image: quay.io/prometheus/prometheus:v2.54.1
+    imageID: quay.io/prometheus/prometheus@sha256:f6639335d34a77d9d9db382b92eeb7fc00934be8eae81dbc03b31cfe90411a94
+    lastState: {}
+    name: prometheus-server
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://1d40794cd293fe8da301a17f5605fd7a7d56c3fdeedcb89d701ec7aea872d5f9
+        exitCode: 2
+        finishedAt: "2024-10-08T19:48:08Z"
+        reason: Error
+        startedAt: "2024-10-08T16:16:12Z"
+  - containerID: containerd://25f4b6e2cd2e40a8a07e32d86f38e468675be8c2d86ac39225410dd532746fd1
+    image: quay.io/prometheus-operator/prometheus-config-reloader:v0.76.0
+    imageID: quay.io/prometheus-operator/prometheus-config-reloader@sha256:3ee47d8f6eae9e3997bd928525946c4eb06d5bb82bf1da69ca743169c331c6a0
+    lastState: {}
+    name: prometheus-server-configmap-reload
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2024-10-08T16:16:12Z"
+  hostIP: 10.128.0.9
+  hostIPs:
+  - ip: 10.128.0.9
+  initContainerStatuses:
+  - containerID: containerd://cee5e7c7ede984f9eda65bbaab15bdbbf9b52d3af5d0117951244868f70c0b48
+    image: docker.io/library/busybox:latest
+    imageID: docker.io/library/busybox@sha256:768e5c6f5cb6db0794eec98dc7a967f40631746c32232b78a3105fb946f3ab83
+    lastState: {}
+    name: init-permissions
+    ready: true
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://cee5e7c7ede984f9eda65bbaab15bdbbf9b52d3af5d0117951244868f70c0b48
+        exitCode: 0
+        finishedAt: "2024-10-08T16:16:11Z"
+        reason: Completed
+        startedAt: "2024-10-08T16:16:11Z"
+  phase: Running
+  podIP: 10.244.140.120
+  podIPs:
+  - ip: 10.244.140.120
+  qosClass: BestEffort
+  startTime: "2024-10-08T16:16:10Z"

@@ -46,7 +46,7 @@ serviceAccount:
   # autoMount: false
   automountServiceAccountToken: false
 
-replicas: 1
+replicas: 6
 
 ## Create a headless service for the deployment
 headlessService: false
@@ -448,6 +448,7 @@ admin:
   existingSecret: ""
   userKey: admin-user
   passwordKey: admin-password
+  password: admin
 
 ## Define command to be executed at startup by grafana container
 ## Needed if using `vault-env` to manage secrets (ref: https://banzaicloud.com/blog/inject-secrets-into-pods-vault/)

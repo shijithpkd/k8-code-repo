@@ -315,7 +315,10 @@ server:
         volumeMounts:
           - name: storage-volume
             mountPath: /data
-
+        securityContext:
+          runAsUser: 65534       # Run as root
+          runAsGroup: 65534      # Optional: specify group
+          allowPrivilegeEscalation: false
   ## Additional Prometheus server Volume mounts
   ##
   extraVolumeMounts: []
@@ -579,7 +582,7 @@ server:
 
   ## Use a StatefulSet if replicaCount needs to be greater than 1 (see below)
   ##
-  replicaCount: 1
+  replicaCount: 6
 
   ## Number of old history to retain to allow rollback
   ## Default Kubernetes value is set to 10
@@ -633,12 +636,12 @@ server:
   readinessProbeInitialDelay: 30
   readinessProbePeriodSeconds: 5
   readinessProbeTimeout: 4
-  readinessProbeFailureThreshold: 3
+  readinessProbeFailureThreshold: 1
   readinessProbeSuccessThreshold: 1
   livenessProbeInitialDelay: 30
   livenessProbePeriodSeconds: 15
   livenessProbeTimeout: 10
-  livenessProbeFailureThreshold: 3
+  livenessProbeFailureThreshold: 1
   livenessProbeSuccessThreshold: 1
   startupProbe:
     enabled: false
