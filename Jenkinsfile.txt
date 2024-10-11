@@ -5,7 +5,12 @@ pipeline {
         // Define environment variables
         SONARQUBE_SCANNER_HOME = tool(name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation')
         SONARQUBE_URL = 'http://34.28.223.41:9000/'  // SonarQube URL
-
+        DOCKER_REGISTRY = 'docker.io'  // Docker registry URL
+       // DOCKER_IMAGE_NAME = 'my-nginx-image'  // Replace with your Docker image name
+        IMAGE_TAG = "${env.BUILD_NUMBER}"  // Using Jenkins build number as the image tag
+        HELM_RELEASE_NAME = 'nginx-release'  // Helm release name
+        HELM_CHART_PATH = './nginx-chat'  // Path to your Helm chart
+        KUBE_NAMESPACE = 'nginx'  // Kubernetes namespace for deployment
     }
 
     stages {
@@ -34,16 +39,22 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker build -t my-flask-app .'
-                sh 'docker tag my-flask-app ${DOCKER_BFLASK_IMAGE}'
+                script {
+                    // Build the Docker image with the specified tag
+                    sh "docker build -t ${DDOCKER_NGINX_IMAG}:${IMAGE_TAG} Docker-files/."
+                    
+                    // Tag the image for the Docker registry
+                    //sh "docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                }
             }
         }
 
-        stage('Test') {
+        stage('Run Tests') {
             steps {
-                sh 'docker run my-flask-app python -m pytest app/tests/'
+                // Run your tests inside the Docker container
+                sh 'docker run --rm my-flask-app python -m pytest app/tests/'
             }
         }
 
@@ -55,10 +66,10 @@ pipeline {
                         def qualityGate = waitForQualityGate()
 
                         if (qualityGate.status != 'OK') {
-                            echo "${qualityGate.status}"
+                            echo "Quality Gate Status: ${qualityGate.status}"
                             error "Quality Gate failed: ${qualityGate.status}"
                         } else {
-                            echo "${qualityGate.status}"
+                            echo "Quality Gate Status: ${qualityGate.status}"
                             echo "SonarQube Quality Gates Passed"
                         }
                     }
@@ -66,22 +77,35 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDS}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
-                    sh 'docker push ${DOCKER_BFLASK_IMAGE}'
+                    script {
+                        // Log in to Docker registry
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}"
+                        
+                        // Push the Docker image to the registry
+                        sh "docker push ${DOCKER_NGINX_IMAG}:${IMAGE_TAG}"
+                    }
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Kubernetes with Helm') {
             steps {
-                script {
-                    sh "sed -i 's|image: .*|image: ${DOCKER_BFLASK_IMAGE}:latest|' deployment.yaml"
-                    withCredentials([file(credentialsId: 'kubernetes-config-file', variable: 'KUBECONFIG')]) {
-                        sh 'kubectl apply -f deployment.yaml'
-                        sh 'kubectl apply -f service.yaml'
+                withCredentials([file(credentialsId: 'kubernetes-config-file', variable: 'KUBECONFIG')]) {
+                    script {
+                        // Initialize Helm (optional, if needed)
+                        sh 'helm version'
+
+                        // Deploy using Helm, passing the image repository and tag as variables
+                        sh """
+                            helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
+                                --set image.repository=${DOCKER_NGINX_IMAG} \
+                                --set image.tag=${IMAGE_TAG} \
+                                --namespace ${KUBE_NAMESPACE} \
+                                --create-namespace
+                        """
                     }
                 }
             }
@@ -90,6 +114,7 @@ pipeline {
 
     post {
         always {
+            // Logout from Docker registry
             sh 'docker logout'
         }
         failure {
