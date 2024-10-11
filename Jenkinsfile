@@ -43,10 +43,10 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image with the specified tag
-                    sh "docker build -t ${DOCKER_NGINX_IMAG}:${IMAGE_TAG} Docker-files/."
+                    sh "docker build -t ${DOCKER_NGINX_IMAGE}:${IMAGE_TAG} Docker-files/."
                     
                     // Tag the image for the Docker registry
-                    //sh "docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                    //sh "docker tag ${DOCKER_NGINX_IMAGE}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${DOCKER_NGINX_IMAGE}:${IMAGE_TAG}"
                 }
             }
         }
@@ -60,7 +60,7 @@ pipeline {
 
                     // Step 1: Run the Nginx container in detached mode
                     sh """
-                        docker run -d --name ${containerName} -p ${testPort}:80 ${DOCKER_NGINX_IMAGAME}:${IMAGE_TAG}
+                        docker run -d --name ${containerName} -p ${testPort}:80 ${DOCKER_NGINX_IMAGE}:${IMAGE_TAG}
                     """
 
                     // Step 2: Wait for Nginx to start
@@ -116,7 +116,7 @@ pipeline {
                         sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}"
                         
                         // Push the Docker image to the registry
-                        sh "docker push ${DOCKER_NGINX_IMAG}:${IMAGE_TAG}"
+                        sh "docker push ${DOCKER_NGINX_IMAGE}:${IMAGE_TAG}"
                     }
                 }
             }
@@ -143,7 +143,7 @@ pipeline {
                             // Deploy using Helm, passing the image repository and tag as variables
                             sh """
                                 helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
-                                    --set image.repository=${DOCKER_NGINX_IMAG} \
+                                    --set image.repository=${DOCKER_NGINX_IMAGE} \
                                     --set image.tag=${IMAGE_TAG} \
                                     --namespace ${KUBE_NAMESPACE} \
                                     --create-namespace
