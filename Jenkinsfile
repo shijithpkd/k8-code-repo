@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Define environment variables
         SONARQUBE_SCANNER_HOME = tool(name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation')
-        SONARQUBE_URL = 'http://34.28.223.41:9000/'  // SonarQube URL
+        SONARQUBE_URL = 'http://34.67.22.183:9000/'  // SonarQube URL
         DOCKER_REGISTRY = 'docker.io'  // Docker registry URL
        // DOCKER_IMAGE_NAME = 'my-nginx-image'  // Replace with your Docker image name
         IMAGE_TAG = "${env.BUILD_NUMBER}"  // Using Jenkins build number as the image tag
