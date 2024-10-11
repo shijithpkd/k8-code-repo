@@ -9,7 +9,7 @@ pipeline {
        // DOCKER_IMAGE_NAME = 'my-nginx-image'  // Replace with your Docker image name
         IMAGE_TAG = "${env.BUILD_NUMBER}"  // Using Jenkins build number as the image tag
         HELM_RELEASE_NAME = 'nginx-release'  // Helm release name
-        HELM_CHART_PATH = './nginx-chat'  // Path to your Helm chart
+        HELM_CHART_PATH = './nginx-chart'  // Path to your Helm chart
         KUBE_NAMESPACE = 'nginx'  // Kubernetes namespace for deployment
     }
 
