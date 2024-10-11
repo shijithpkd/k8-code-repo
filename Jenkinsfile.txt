@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image with the specified tag
-                    sh "docker build -t ${DDOCKER_NGINX_IMAG}:${IMAGE_TAG} Docker-files/."
+                    sh "docker build -t ${DOCKER_NGINX_IMAG}:${IMAGE_TAG} Docker-files/."
                     
                     // Tag the image for the Docker registry
                     //sh "docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
@@ -53,8 +53,39 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                // Run your tests inside the Docker container
-                sh 'docker run --rm my-flask-app python -m pytest app/tests/'
+                script {
+                    // Define variables for container name and test port
+                    def containerName = "nginx-test-${env.BUILD_NUMBER}"
+                    def testPort = 8080  // You can choose any available port
+
+                    // Step 1: Run the Nginx container in detached mode
+                    sh """
+                        docker run -d --name ${containerName} -p ${testPort}:80 ${DOCKER_NGINX_IMAGAME}:${IMAGE_TAG}
+                    """
+
+                    // Step 2: Wait for Nginx to start
+                    sh 'sleep 15'  // Adjust the sleep duration if necessary
+
+                    // Step 3: Perform health check using curl
+                    // You can customize the URL and expected response based on your Nginx configuration
+                    def response = sh(
+                        script: "curl -s -o /dev/null -w \"%{http_code}\" http://localhost:${testPort}",
+                        returnStdout: true
+                    ).trim()
+
+                    // Step 4: Validate the response
+                    if (response != '200') {
+                        error "Nginx server health check failed. Expected HTTP 200 but received ${response}."
+                    } else {
+                        echo "Nginx server is up and responding with HTTP 200."
+                    }
+
+                    // Step 5: Stop and remove the Nginx container
+                    sh """
+                        docker stop ${containerName}
+                        docker rm ${containerName}
+                    """
+                }
             }
         }
 
@@ -93,19 +124,35 @@ pipeline {
 
         stage('Deploy to Kubernetes with Helm') {
             steps {
-                withCredentials([file(credentialsId: 'kubernetes-config-file', variable: 'KUBECONFIG')]) {
-                    script {
-                        // Initialize Helm (optional, if needed)
-                        sh 'helm version'
+                script {
+                    // Trigger manual input for deployment
+                    def userInput = input(
+                        id: 'ProceedDeployment', message: 'Deploy to Kubernetes?', parameters: [
+                            [$class: 'BooleanParameterDefinition', defaultValue: true, description: 'Proceed with deploying to Kubernetes?', name: 'Deploy']
+                        ]
+                    )
 
-                        // Deploy using Helm, passing the image repository and tag as variables
-                        sh """
-                            helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
-                                --set image.repository=${DOCKER_NGINX_IMAG} \
-                                --set image.tag=${IMAGE_TAG} \
-                                --namespace ${KUBE_NAMESPACE} \
-                                --create-namespace
-                        """
+                    if (userInput) {
+                        withCredentials([file(credentialsId: 'kubernetes-config-file', variable: 'KUBECONFIG')]) {
+                            // (Optional) Validate Helm chart
+                            sh "helm lint ${HELM_CHART_PATH}"
+
+                            // Initialize Helm (optional, if needed)
+                            sh 'helm version'
+
+                            // Deploy using Helm, passing the image repository and tag as variables
+                            sh """
+                                helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
+                                    --set image.repository=${DOCKER_NGINX_IMAG} \
+                                    --set image.tag=${IMAGE_TAG} \
+                                    --namespace ${KUBE_NAMESPACE} \
+                                    --create-namespace
+                            """
+                        }
+                    } else {
+                        echo "Deployment to Kubernetes was aborted by the user."
+                        // Optionally, you can mark the build as unstable or failed
+                        // currentBuild.result = 'UNSTABLE'
                     }
                 }
             }
