@@ -1,6 +1,15 @@
 pipeline {
     agent any
 
+    parameters {
+        booleanParam(name: 'RUN_CHECKOUT', defaultValue: true, description: 'Run Checkout stage')
+        booleanParam(name: 'RUN_SONARQUBE', defaultValue: true, description: 'Run SonarQube Analysis stage')
+        booleanParam(name: 'RUN_BUILD', defaultValue: true, description: 'Run Build Docker Image stage')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run Tests stage')
+        booleanParam(name: 'RUN_QUALITY_GATE', defaultValue: true, description: 'Run Quality Gate stage')
+        booleanParam(name: 'RUN_PUSH', defaultValue: true, description: 'Run Push Docker Image stage')
+        booleanParam(name: 'RUN_DEPLOY', defaultValue: true, description: 'Run Deploy to Kubernetes stage')
+    }
     environment {
         // Define environment variables
         SONARQUBE_SCANNER_HOME = tool(name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation')
