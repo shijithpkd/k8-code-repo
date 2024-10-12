@@ -2,22 +2,57 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-nginx
+  namespace: nginx
   labels:
     app: myapp
     type: front-end
 spec:
-  template:
-    metadata:
-      name: myapp-pod
-      labels:
-          app: myapp
-          type: front-end
-    spec:
-        containers:
-        - name: nginx-server
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
+      app: myapp
       type: front-end
-    
+  template:
+    metadata:
+      labels:
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+        - name: nginx-server
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:0.9.0
+          ports:
+            - containerPort: 9113
+          args:
+            - -nginx.scrape-uri=http://localhost:80/stub_status
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9113
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9113
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ .Release.Name }}-nginx-config

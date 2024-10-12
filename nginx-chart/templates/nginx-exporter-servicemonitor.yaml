@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-nginx-exporter
+  namespace: monitoring  # Replace with your Prometheus namespace
+  labels:
+    release: prometheus # Ensure this matches your Prometheus release label
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+      type: front-end
+      component: exporter
+  namespaceSelector:
+    matchNames:
+      - nginx
+  endpoints:
+    - port: metrics
+      interval: 15s

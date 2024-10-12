@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-nginx-exporter
+  namespace: nginx
+  labels:
+    app: myapp
+    type: front-end
+    component: exporter
+spec:
+  selector:
+    app: myapp
+    type: front-end
+  ports:
+    - name: metrics
+      port: 9113
+      targetPort: 9113
+  type: ClusterIP
