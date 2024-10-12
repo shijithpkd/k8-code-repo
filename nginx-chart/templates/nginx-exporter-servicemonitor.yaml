@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-nginx-exporter
-  namespace: default  # Replace with your Prometheus namespace
+#  namespace: default  # Replace with your Prometheus namespace
   labels:
     release: prometheus # Ensure this matches your Prometheus release label
 spec:
